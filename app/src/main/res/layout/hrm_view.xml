@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <ImageView
+        android:id="@+id/ImageView01"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/heart" />
+
+    <com.example.talos_2.android.common.AutoResizeTextView
+        android:id="@+id/bpm"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginBottom="@dimen/auto_resize_margin_bottom"
+        android:layout_marginTop="@dimen/auto_resize_margin_top"
+        android:gravity="center"
+        android:text="0"
+        android:textColor="#ffffff"
+        android:textSize="@dimen/font_x_large_resize_max"
+        android:textStyle="bold"
+        android:typeface="monospace" />
+
+</LinearLayout>
