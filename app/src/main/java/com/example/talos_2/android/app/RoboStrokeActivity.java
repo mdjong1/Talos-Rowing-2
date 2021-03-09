@@ -21,7 +21,6 @@ package com.example.talos_2.android.app;
 
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -98,13 +97,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 /**
  * AndroidRoboStroke application entry point and main activity/
  */
-public class RoboStrokeActivity extends Activity implements RoboStrokeConstants , ParameterListenerOwner {
+public class RoboStrokeActivity extends AppCompatActivity implements RoboStrokeConstants , ParameterListenerOwner {
 
 	private static final String MIME_TYPE_ROBOSTROKE_SESSION = "application/vnd.robostroke.session";
 
@@ -661,7 +661,10 @@ public class RoboStrokeActivity extends Activity implements RoboStrokeConstants 
 			ConfigureLog4J.configure(null);
 		}
 		
-		setContentView(R.layout.main);		
+		setContentView(R.layout.main);
+
+//		Toolbar toolbar = findViewById(R.id.toolbar);
+//		setSupportActionBar(toolbar);
 		
 		notificationHelper = new NotificationHelper(this, R.drawable.icon_small322);
 
@@ -1183,7 +1186,7 @@ public class RoboStrokeActivity extends Activity implements RoboStrokeConstants 
 	}
 
 	@Override
-	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_replay_start:
 			
