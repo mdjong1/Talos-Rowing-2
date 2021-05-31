@@ -67,8 +67,6 @@ import com.example.talos_2.data.FileDataInput;
 import com.example.talos_2.data.SensorDataInput;
 import com.example.talos_2.data.SessionRecorderConstants;
 import com.example.talos_2.data.version.DataVersionConverter;
-import com.example.talos_2.param.Parameter;
-import com.example.talos_2.param.ParameterChangeListener;
 import com.example.talos_2.param.ParameterListenerOwner;
 import com.example.talos_2.param.ParameterListenerRegistration;
 
@@ -119,18 +117,14 @@ public class RoboStrokeActivity extends AppCompatActivity implements RoboStrokeC
 	private static final Logger logger = LoggerFactory.getLogger(RoboStrokeActivity.class);
 	
 	private final ParameterListenerRegistration[] listenerRegistrations = {
-			new ParameterListenerRegistration(ParamKeys.PARAM_SESSION_RECORDING_ON.getId(), new ParameterChangeListener() {
-				
-				@Override
-				public void onParameterChanged(Parameter param) {
-					final boolean recording = (Boolean)param.getValue();
-					
-					setRecordingOn(recording);
-					
-					final int padding = recording ? HIGHLIGHT_PADDING_SIZE : 0;
-					
-					updateRecordingStateIndication(padding, RECORDING_ON_COLOUR);
-				}
+			new ParameterListenerRegistration(ParamKeys.PARAM_SESSION_RECORDING_ON.getId(), param -> {
+				final boolean recording = param.getValue();
+
+				setRecordingOn(recording);
+
+				final int padding = recording ? HIGHLIGHT_PADDING_SIZE : 0;
+
+				updateRecordingStateIndication(padding, RECORDING_ON_COLOUR);
 			})
 	};
 	
@@ -139,8 +133,7 @@ public class RoboStrokeActivity extends AppCompatActivity implements RoboStrokeC
 
 	ScheduledExecutorService scheduler;
 	
-	final RoboStroke roboStroke = 
-			new RoboStroke(new AndroidLocationDistanceResolver(), new TalosBroadcastServiceConnector(this));
+	final RoboStroke roboStroke = new RoboStroke(new AndroidLocationDistanceResolver(), new TalosBroadcastServiceConnector(this));
 
 	public NotificationHelper notificationHelper;
 
@@ -174,8 +167,6 @@ public class RoboStrokeActivity extends AppCompatActivity implements RoboStrokeC
 		}
 		
 		private void resetSessionRecording() {
-
-			
 
 			try {
 				if (recordingOn && !isReplaying()) {
@@ -215,7 +206,6 @@ public class RoboStrokeActivity extends AppCompatActivity implements RoboStrokeC
 								roboStroke.setDataLogger(null);
 							} catch (IOException e) {
 								error.set(e);
-							} finally {
 							}
 						}
 					};
@@ -601,12 +591,12 @@ public class RoboStrokeActivity extends AppCompatActivity implements RoboStrokeC
 	private DataInputInfo dataInputInfo = new DataInputInfo();
 
 	public RoboStrokeActivity() {
-		
+
 		Thread.setDefaultUncaughtExceptionHandler(new ErrorHandler(this));
 		
 		screenLock = new ScreenStayupLock(this, getClass().getSimpleName());
 		
-		roboStroke.getParameters().addListeners(this);		
+		roboStroke.getParameters().addListeners(this);
 	}
 
 	public Handler getHandler() {
@@ -668,17 +658,17 @@ public class RoboStrokeActivity extends AppCompatActivity implements RoboStrokeC
 		
 		notificationHelper = new NotificationHelper(this, R.drawable.icon_small322);
 
-
 		ACRA.getErrorReporter().putCustomData("uuid", preferencesHelper.getUUID());
 		
 		roboStroke.setErrorListener(new ErrorListener() {
 
 			@Override
 			public void onError(Exception e) {
-				notificationHelper.notifyError(ROBOSTROKE_ERROR,
-						e.getMessage(), "robostroke error", "robostroke error");
+				notificationHelper.notifyError(ROBOSTROKE_ERROR, e.getMessage(), "robostroke error", "robostroke error");
 			}
 		});
+
+		logger.error(getRoboStroke().toString());
 
 		metersDisplayManager = new MetersDisplayManager(this);
 		
@@ -1150,7 +1140,7 @@ public class RoboStrokeActivity extends AppCompatActivity implements RoboStrokeC
 
 		boolean enableStart = hasExternalStorage && !replay && !recordingOn;
 		
-		boolean isBroadcasting = (Boolean)roboStroke.getParameters().getValue(ParamKeys.PARAM_SESSION_BROADCAST_ON.getId());
+		boolean isBroadcasting = roboStroke.getParameters().getValue(ParamKeys.PARAM_SESSION_BROADCAST_ON.getId());
 		boolean isRemote = dataInputInfo.inputType == DataInputInfo.InputType.REMOTE;
 		
 		menu.findItem(R.id.menu_replay_start).setVisible(enableStart);
@@ -1205,9 +1195,11 @@ public class RoboStrokeActivity extends AppCompatActivity implements RoboStrokeC
 		case R.id.menu_broadcast_start:
 			roboStroke.getParameters().setParam(ParamKeys.PARAM_SESSION_BROADCAST_ON.getId(), true);
 			break;
+
 		case R.id.menu_broadcast_stop:
 			roboStroke.getParameters().setParam(ParamKeys.PARAM_SESSION_BROADCAST_ON.getId(), false);
 			break;
+
 		case R.id.menu_record_start:
 			if (recheckExternalStorage()) {
 				roboStroke.getParameters().setParam(ParamKeys.PARAM_SESSION_RECORDING_ON.getId(), true);

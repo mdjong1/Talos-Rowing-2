@@ -23,7 +23,8 @@
     <item
         android:id="@+id/menu_broadcast_stop"
         android:icon="@drawable/menu_broadcast_stop"
-        android:title="Transmit" />
+        android:title="Stop"
+        android:visible="false"/>
     <item
         android:id="@+id/menu_replay_stop"
         android:icon="@drawable/menu_replay_stop"

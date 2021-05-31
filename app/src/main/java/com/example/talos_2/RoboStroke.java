@@ -26,7 +26,6 @@ import com.example.talos_2.common.SimpleLock;
 import com.example.talos_2.data.AxisDataReverseFilter;
 import com.example.talos_2.data.AxisDataSwapFilter;
 import com.example.talos_2.data.DataIdx;
-import com.example.talos_2.data.DataRecord;
 import com.example.talos_2.data.DataRecord.Type;
 import com.example.talos_2.data.ErrorListener;
 import com.example.talos_2.data.FileDataInput;
@@ -38,9 +37,7 @@ import com.example.talos_2.data.SessionRecorder;
 import com.example.talos_2.data.remote.DataRemote.DataRemoteError;
 import com.example.talos_2.data.remote.DataSender;
 import com.example.talos_2.data.remote.SessionBroadcaster;
-import com.example.talos_2.param.Parameter;
 import com.example.talos_2.param.ParameterBusEventData;
-import com.example.talos_2.param.ParameterChangeListener;
 import com.example.talos_2.param.ParameterService;
 import com.example.talos_2.stroke.RollScanner;
 import com.example.talos_2.stroke.RowingDetector;
@@ -49,6 +46,7 @@ import com.example.talos_2.stroke.StrokeRateScanner;
 import com.example.talos_2.way.DistanceResolver;
 import com.example.talos_2.way.DistanceResolverDefault;
 import com.example.talos_2.way.GPSDataFilter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,8 +57,8 @@ import java.io.IOException;
  * A RoboStroke engine initializer.
  * This is a handy class for initializing and connecting the various data input
  * filters and processors. A user of this class will usually set event listeners
- * by calling {@link StrokeRateScanner#setStrokeListener(com.example.talos_2.stroke.StrokeRateListener) strokeRateScanner.setStrokeRateListener}
- * and {@link GPSDataFilter#setWayListener(com.example.talos_2.way.WayListener) gpsFilter.setWayListener}. The client can also register for
+ * by calling @link StrokeRateScanner#setStrokeListener(com.example.talos_2.stroke.StrokeRateListener) strokeRateScanner.setStrokeRateListener}
+ * and @link GPSDataFilter#setWayListener(com.example.talos_2.way.WayListener) gpsFilter.setWayListener}. The client can also register for
  * raw Sensor data events by attaching a {@link SensorDataSink} to any {@link SensorDataSource} or {@link SensorDataFilter} object. 
  *
  */
@@ -162,7 +160,7 @@ public class RoboStroke {
 	public RoboStroke(DistanceResolver distanceResolver, DataSender dataSenderImpl) {
 				
 		com.example.talos_2.ParamRegistration.installParams(parameters);
-		
+
 		try {
 			sessionBroadcaster = new SessionBroadcaster(this, dataSenderImpl);
 		} catch (DataRemoteError e) {
@@ -171,75 +169,40 @@ public class RoboStroke {
 		
 		initPipeline(distanceResolver);
 		
-		parameters.addListener(com.example.talos_2.ParamKeys.PARAM_SESSION_BROADCAST_ON.getId(), new ParameterChangeListener() {
-			
-			@Override
-			public void onParameterChanged(Parameter param) {
-				synchronized (inputLock) {
-					
-					broadcastOn = (Boolean) param.getValue();
-					
-					if (dataInput != null) {
-						if (sessionBroadcaster != null) sessionBroadcaster.enable(broadcastOn);
-					}
-					
-				}				
+		parameters.addListener(com.example.talos_2.ParamKeys.PARAM_SESSION_BROADCAST_ON.getId(), param -> {
+			synchronized (inputLock) {
+
+				broadcastOn = param.getValue();
+
+				if (dataInput != null) {
+					if (sessionBroadcaster != null) sessionBroadcaster.enable(broadcastOn);
+				}
+
 			}
 		});
 		
-		parameters.addListener(com.example.talos_2.ParamKeys.PARAM_SESSION_BROADCAST_PORT.getId(), new ParameterChangeListener() {
-			
-			@Override
-			public void onParameterChanged(Parameter param) {
-				if (sessionBroadcaster != null)  sessionBroadcaster.setPort((Integer)param.getValue());
-				
-			}
+		parameters.addListener(com.example.talos_2.ParamKeys.PARAM_SESSION_BROADCAST_PORT.getId(), param -> {
+			if (sessionBroadcaster != null)  sessionBroadcaster.setPort(param.getValue());
+
 		});
 		
-		parameters.addListener(com.example.talos_2.ParamKeys.PARAM_SESSION_BROADCAST_HOST.getId(), new ParameterChangeListener() {
-			
-			@Override
-			public void onParameterChanged(Parameter param) {
-				if (sessionBroadcaster != null) sessionBroadcaster.setAddress((String)param.getValue());
-				
-			}
+		parameters.addListener(com.example.talos_2.ParamKeys.PARAM_SESSION_BROADCAST_HOST.getId(), param -> {
+			if (sessionBroadcaster != null) sessionBroadcaster.setAddress(param.getValue());
+
 		});
 
-		parameters.addListener(com.example.talos_2.ParamKeys.PARAM_SENSOR_ORIENTATION_REVERSED.getId(), new ParameterChangeListener() {
-			
-			@Override
-			public void onParameterChanged(Parameter param) {
-				setCoaxMode((Boolean)param.getValue());
-				
-			}
-		});
+		parameters.addListener(com.example.talos_2.ParamKeys.PARAM_SENSOR_ORIENTATION_REVERSED.getId(), param -> setCoaxMode(param.getValue()));
 		
-		parameters.addListener(com.example.talos_2.ParamKeys.PARAM_SENSOR_ORIENTATION_LANDSCAPE.getId(), new ParameterChangeListener() {
-			
-			@Override
-			public void onParameterChanged(Parameter param) {
-				setLandscapeMode((Boolean)param.getValue());
-				
-			}
-		});
+		parameters.addListener(com.example.talos_2.ParamKeys.PARAM_SENSOR_ORIENTATION_LANDSCAPE.getId(), param -> setLandscapeMode(param.getValue()));
 		
 		setCoaxMode((Boolean)parameters.getValue(com.example.talos_2.ParamKeys.PARAM_SENSOR_ORIENTATION_REVERSED.getId()));
 		
-		sessionParamChangeListener = new com.example.talos_2.BusEventListener() {
-			
-			@Override
-			public void onBusEvent(DataRecord event) {
-				switch (event.type) {
-				case SESSION_PARAMETER:
-					
-					ParameterBusEventData pd = (ParameterBusEventData) event.data;
-					
-					if (pd.id.equals(com.example.talos_2.ParamKeys.PARAM_SENSOR_ORIENTATION_REVERSED.getId())) {
-						parameters.setParam(pd.id, pd.value);
-					}
-					
-					break;
+		sessionParamChangeListener = event -> {
+			if (event.type == Type.SESSION_PARAMETER) {
+				ParameterBusEventData pd = (ParameterBusEventData) event.data;
 
+				if (pd.id.equals(ParamKeys.PARAM_SENSOR_ORIENTATION_REVERSED.getId())) {
+					parameters.setParam(pd.id, pd.value);
 				}
 			}
 		};
@@ -297,7 +260,7 @@ public class RoboStroke {
 
 	/**
 	 * Set the sensor data input to replay from a file.
-	 * look at the code in {@link LoggingSensorDataInput#logData} to see what
+	 * look at the code in @link LoggingSensorDataInput#logData} to see what
 	 * the data file content should look like.
 	 * @param file replay input file
 	 * @throws IOException
@@ -309,7 +272,7 @@ public class RoboStroke {
 
 	/**
 	 * Set the sensor data input to a real device dependant implementation
-	 * @param impl device input implementation
+	 * @param dataInput device input implementation
 	 */
 	public void setInput(SensorDataInput dataInput) {
 		synchronized (inputLock) {

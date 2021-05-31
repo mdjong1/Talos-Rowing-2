@@ -27,10 +27,10 @@ import com.example.talos_2.data.remote.RemoteDataHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TalosBroadcastServiceConnector  implements DataSender {
+public class TalosBroadcastServiceConnector implements DataSender {
 
 	private static final Logger logger = LoggerFactory.getLogger(TalosBroadcastServiceConnector.class);
-	
+
 	private final RoboStrokeActivity owner;
 	private Intent service;
 	private boolean started;
@@ -41,17 +41,12 @@ public class TalosBroadcastServiceConnector  implements DataSender {
 	}
 
 	@Override
-	public synchronized void start() throws DataRemoteError {
+	public synchronized void start() {
 
 		TalosRemoteServiceHelper helper;
 		
-		
-		try {
-			this.helper = helper = new TalosRemoteServiceHelper(owner, TalosRemoteServiceHelper.BROADCAST_SERVICE_ID);
-		} catch (ServiceNotExist e) {
-			throw new DataRemoteError(e);
-		}
-		
+		this.helper = helper = new TalosRemoteServiceHelper(owner, TalosRemoteServiceHelper.BROADCAST_SERVICE_ID);
+
 		service = helper.service;
 
 		int port = RemoteDataHelper.getPort(owner.getRoboStroke());

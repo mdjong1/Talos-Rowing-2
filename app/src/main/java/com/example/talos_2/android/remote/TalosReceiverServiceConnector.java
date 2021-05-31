@@ -28,7 +28,7 @@ import android.os.Bundle;
 import com.example.talos_2.RoboStroke;
 import com.example.talos_2.common.ThreadedQueue;
 import com.example.talos_2.data.RecordDataInput;
-import com.example.talos_2.data.SessionRecorderConstants;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,24 +46,22 @@ public class TalosReceiverServiceConnector extends RecordDataInput {
 
 	private boolean started;	
 		
-	public TalosReceiverServiceConnector(Context owner, RoboStroke roboStroke, String host) throws ServiceNotExist {
-		this(owner, roboStroke, host, SessionRecorderConstants.BROADCAST_PORT);
-	}
-	
-	public TalosReceiverServiceConnector(Context owner, RoboStroke roboStroke, String host, int port) throws ServiceNotExist {
+	public TalosReceiverServiceConnector(Context owner, RoboStroke roboStroke, String host, int port) {
 		
 		super(roboStroke);
 		
 		TalosRemoteServiceHelper helper = new TalosRemoteServiceHelper(owner, TalosRemoteServiceHelper.RECEIVER_SERVICE_ID);
-		
+
 		this.owner = owner;
 		
    		service = helper.service;
-   		
+
    		service.putExtra("host", host);
-   		service.putExtra("port", port);   
-   		
-   		recordQueue = new ThreadedQueue<String>(getClass().getSimpleName(), 100) {
+   		service.putExtra("port", port);
+
+		logger.error("starting receiver service from endpoint {}:{}", host, port);
+
+		recordQueue = new ThreadedQueue<String>(getClass().getSimpleName(), 100) {
 			
 			@Override
 			protected void handleItem(String o) {

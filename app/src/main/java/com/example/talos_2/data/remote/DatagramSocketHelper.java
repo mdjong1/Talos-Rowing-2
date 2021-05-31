@@ -9,6 +9,7 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 
 class DatagramSocketHelper {
@@ -109,7 +110,7 @@ class DatagramSocketHelper {
 		
 		logger.debug("sending {} to {}", s, socketAddress);
 		
-		byte[] buf = s.getBytes("UTF-8");		
+		byte[] buf = s.getBytes(StandardCharsets.UTF_8);
 
 		DatagramPacket packet = new DatagramPacket(buf, buf.length, socketAddress);
 		

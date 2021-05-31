@@ -13,7 +13,7 @@ public class DatagramDataSender extends DatagramData implements DataSender {
 
 	private static final Logger logger = LoggerFactory.getLogger(DatagramDataSender.class);
 
-	private final ArrayBlockingQueue<String> recordQueue = new ArrayBlockingQueue<String>(30);
+	private final ArrayBlockingQueue<String> recordQueue = new ArrayBlockingQueue<>(30);
 		
 
 	public DatagramDataSender(String address, int port) throws DataRemoteError {
